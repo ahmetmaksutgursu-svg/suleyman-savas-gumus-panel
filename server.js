@@ -6,10 +6,14 @@ const cheerio = require("cheerio");
 const app = express();
 app.use(cors());
 app.use(express.static(__dirname));
+
 const PORT = process.env.PORT || 3001;
 
 const CANLI_DOVIZ_HALKBANK_ALTIN_URL =
   "https://canlidoviz.com/altin-fiyatlari/halkbank";
+
+const CANLI_DOVIZ_HALKBANK_DOVIZ_URL =
+  "https://canlidoviz.com/doviz-kurlari/halkbank";
 
 function parseTrNum(str) {
   if (!str) return null;
@@ -44,7 +48,7 @@ function getNumbersFromCells(cells) {
     .filter((n) => Number.isFinite(n) && n > 0);
 }
 
-function parseCanliDoviz(html) {
+function parseAltinGumus(html) {
   const $ = cheerio.load(html);
 
   let goldBuy = null;
@@ -61,12 +65,9 @@ function parseCanliDoviz(html) {
         cells.push(cleanText($(cell).text()));
       });
 
-    const joinedOriginal = cells.join(" ");
-    const joined = joinedOriginal.toLowerCase();
-
+    const joined = cells.join(" ").toLowerCase();
     const numbers = getNumbersFromCells(cells);
 
-    // CanlıDöviz Halkbank altın sayfasında Gram Altın satırı: GA Gram Altın ...
     if (
       (joined.includes("gram altın") ||
         joined.includes("gram altin") ||
@@ -77,7 +78,6 @@ function parseCanliDoviz(html) {
       goldSell = numbers[1];
     }
 
-    // CanlıDöviz Halkbank altın sayfasında Gümüş satırı: GAG Gümüş ...
     if (
       (joined.includes("gümüş") || joined.includes("gumus")) &&
       numbers.length >= 2
@@ -88,9 +88,7 @@ function parseCanliDoviz(html) {
   });
 
   if (!silverBuy || !silverSell || !goldBuy || !goldSell) {
-    throw new Error(
-      "CanlıDöviz Halkbank sayfasından gümüş/altın fiyatları okunamadı."
-    );
+    throw new Error("Altın/gümüş fiyatları okunamadı.");
   }
 
   return {
@@ -98,27 +96,96 @@ function parseCanliDoviz(html) {
     silverSell,
     goldBuy,
     goldSell,
-    source: "halkbank-live",
-    provider: "canlidoviz-halkbank",
-    updatedAt: new Date().toISOString(),
+  };
+}
+
+function parseDolarEuro(html) {
+  const $ = cheerio.load(html);
+
+  let usdBuy = null;
+  let usdSell = null;
+  let eurBuy = null;
+  let eurSell = null;
+
+  $("tr").each((i, row) => {
+    const cells = [];
+
+    $(row)
+      .find("td, th")
+      .each((j, cell) => {
+        cells.push(cleanText($(cell).text()));
+      });
+
+    const joined = cells.join(" ").toLowerCase();
+    const numbers = getNumbersFromCells(cells);
+
+    if (
+      !usdBuy &&
+      (joined.includes("amerikan doları") ||
+        joined.includes("abd doları") ||
+        joined.includes("usd") ||
+        joined.includes("dolar")) &&
+      numbers.length >= 2
+    ) {
+      usdBuy = numbers[0];
+      usdSell = numbers[1];
+    }
+
+    if (
+      !eurBuy &&
+      (joined.includes("euro") ||
+        joined.includes("avro") ||
+        joined.includes("eur")) &&
+      numbers.length >= 2
+    ) {
+      eurBuy = numbers[0];
+      eurSell = numbers[1];
+    }
+  });
+
+  if (!usdBuy || !usdSell || !eurBuy || !eurSell) {
+    throw new Error("Dolar/euro fiyatları okunamadı.");
+  }
+
+  return {
+    usdBuy,
+    usdSell,
+    eurBuy,
+    eurSell,
   };
 }
 
 app.get("/api/halkbank", async (req, res) => {
   try {
-    const response = await axios.get(CANLI_DOVIZ_HALKBANK_ALTIN_URL, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
-        "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
-      },
-      timeout: 10000,
-    });
+    const headers = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+      "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
+    };
 
-    const prices = parseCanliDoviz(response.data);
-    res.json(prices);
+    const [altinResponse, dovizResponse] = await Promise.all([
+      axios.get(CANLI_DOVIZ_HALKBANK_ALTIN_URL, {
+        headers,
+        timeout: 10000,
+      }),
+      axios.get(CANLI_DOVIZ_HALKBANK_DOVIZ_URL, {
+        headers,
+        timeout: 10000,
+      }),
+    ]);
+
+    const metalPrices = parseAltinGumus(altinResponse.data);
+    const currencyPrices = parseDolarEuro(dovizResponse.data);
+
+    res.json({
+      ...metalPrices,
+      ...currencyPrices,
+      source: "halkbank-live",
+      provider: "canlidoviz-halkbank",
+      updatedAt: new Date().toISOString(),
+    });
   } catch (error) {
-    console.error("CanlıDöviz veri hatası:", error.message);
+    console.error("Veri hatası:", error.message);
 
     res.status(500).json({
       error: true,
