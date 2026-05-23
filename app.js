@@ -311,20 +311,46 @@ function updateWinner(c) {
   const wDiff = $('winnerDiff');
   if (!wName || !wDiff) return;
 
-  const diff = c.silverPL - c.goldPL;
+  const investments = [
+    {
+      name: 'Gümüş',
+      icon: '⬡',
+      profit: c.silverPL,
+      className: 'silver-win',
+    },
+    {
+      name: 'Altın',
+      icon: '✦',
+      profit: c.goldPL,
+      className: 'gold-win',
+    },
+    {
+      name: 'Dolar',
+      icon: '$',
+      profit: c.usdPL,
+      className: 'silver-win',
+    },
+    {
+      name: 'Euro',
+      icon: '€',
+      profit: c.eurPL,
+      className: 'gold-win',
+    },
+  ];
+
+  investments.sort((a, b) => b.profit - a.profit);
+
+  const winner = investments[0];
+  const second = investments[1];
+  const diff = winner.profit - second.profit;
+
+  wName.textContent = `${winner.icon} ${winner.name}`;
+  wName.className = `winner-name ${winner.className}`;
 
   if (Math.abs(diff) < 100) {
-    wName.textContent = 'Eşit';
-    wName.className   = 'winner-name';
-    wDiff.textContent = 'İkisi de yakın performans gösteriyor';
-  } else if (diff > 0) {
-    wName.textContent = '⬡ Gümüş';
-    wName.className   = 'winner-name silver-win';
-    wDiff.textContent = `Altından ${fmtTL(diff, 0)} daha fazla kâr`;
+    wDiff.textContent = 'Yatırımlar birbirine çok yakın performans gösteriyor';
   } else {
-    wName.textContent = '✦ Altın';
-    wName.className   = 'winner-name gold-win';
-    wDiff.textContent = `Gümüşten ${fmtTL(-diff, 0)} daha fazla kâr`;
+    wDiff.textContent = `En yakın alternatife göre ${fmtTL(diff, 0)} daha fazla kâr`;
   }
 }
 
