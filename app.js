@@ -9,11 +9,15 @@
    1. SABİT YATIRIM BİLGİLERİ
    ══════════════════════════════════════════ */
 const INVESTMENT = {
-  silverGrams:    20_000,       // 20 kg = 20.000 gram
-  silverBuyPrice: 156.00,       // TL/gram alış fiyatı
-  totalCost:      3_120_000,    // 20.000 × 156 = 3.120.000 TL
+  silverGrams:    20_000,
+  silverBuyPrice: 156.00,
+  totalCost:      3_120_000,
   buyDate:        '1 Şubat 2026',
-  goldBuyFeb:     API.GOLD_BUY_FEB_2026,  // api.js'den gelir
+  goldBuyFeb:     API.GOLD_BUY_FEB_2026,
+
+  // 1 Şubat 2026 tarihinde döviz alınsaydı kullanılacak satış fiyatları
+  usdBuyFeb:      43.42,
+  eurBuyFeb:      51.92,
 };
 
 // 1 Şub 2026'da 3.120.000 TL ile alınan altın gramı
