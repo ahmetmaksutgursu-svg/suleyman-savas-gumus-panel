@@ -37,7 +37,11 @@ const API = (() => {
       !Number.isFinite(Number(data.silverBuy)) ||
       !Number.isFinite(Number(data.silverSell)) ||
       !Number.isFinite(Number(data.goldBuy)) ||
-      !Number.isFinite(Number(data.goldSell))
+      !Number.isFinite(Number(data.goldSell)) ||
+      !Number.isFinite(Number(data.usdBuy)) ||
+      !Number.isFinite(Number(data.usdSell)) ||
+      !Number.isFinite(Number(data.eurBuy)) ||
+      !Number.isFinite(Number(data.eurSell))
     ) {
       throw new Error("Eksik veya hatalı fiyat verisi geldi.");
     }
@@ -47,6 +51,12 @@ const API = (() => {
       silverSell: Number(data.silverSell),
       goldBuy: Number(data.goldBuy),
       goldSell: Number(data.goldSell),
+
+      usdBuy: Number(data.usdBuy),
+      usdSell: Number(data.usdSell),
+      eurBuy: Number(data.eurBuy),
+      eurSell: Number(data.eurSell),
+
       source: "halkbank-live",
       provider: data.provider || "canlidoviz-halkbank",
       updatedAt: data.updatedAt || new Date().toISOString(),
