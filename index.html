@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Süleyman Savaş – Gümüş Yatırım Takip Paneli</title>
+  <meta name="description" content="Süleyman Savaş adına 20 kg gümüş yatırımının anlık değerini takip eden kişisel yatırım paneli. Halkbank verileriyle güncellenir." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-logo">
+          <span class="brand-icon">◈</span>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-name">Süleyman Savaş</h1>
+          <p class="brand-slogan">Gümüş Yatırım Takip Paneli</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-label" id="statusLabel">Bağlanıyor...</span>
+        </div>
+        <div class="last-update" id="lastUpdate">—</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════ REFRESH BANNER ══════════════ -->
+  <div class="refresh-banner">
+    <div class="refresh-inner">
+      <span class="refresh-icon">↻</span>
+      <span>Otomatik yenileme: <strong id="countdown">10</strong> saniye</span>
+      <span class="divider">|</span>
+      <span>Kaynak: <strong>Halkbank</strong></span>
+      <span class="divider">|</span>
+      <span id="dataSourceStatus">Veri bekleniyor...</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ MAIN CONTENT ══════════════ -->
+  <main class="main-content">
+
+    <!-- ── SECTION 1: ANA METRİKLER ── -->
+    <section class="section" id="mainMetrics">
+      <h2 class="section-title">
+        <span class="section-icon">◈</span>
+        Gümüş Yatırım Özeti
+        <span class="section-badge">20 KG</span>
+      </h2>
+
+      <div class="cards-grid cards-grid--3">
+
+        <!-- Güncel Gümüş Değeri -->
+        <div class="card card--highlight card--silver" id="cardCurrentValue">
+          <div class="card-header">
+            <span class="card-icon">⬡</span>
+            <span class="card-label">Güncel Gümüş Değeri</span>
+            <span class="card-badge">20.000 gr</span>
+          </div>
+          <div class="card-value" id="currentValue">—</div>
+          <div class="card-sub">
+            <span class="card-sub-icon">⬡</span>
+            <span id="currentValuePerGram">Gram fiyatı yükleniyor...</span>
+          </div>
+          <div class="card-shimmer"></div>
+        </div>
+
+        <!-- Toplam Alış Maliyeti -->
+        <div class="card card--neutral" id="cardCost">
+          <div class="card-header">
+            <span class="card-icon">◉</span>
+            <span class="card-label">Toplam Alış Maliyeti</span>
+            <span class="card-badge">1 Şub 2026</span>
+          </div>
+          <div class="card-value card-value--neutral">3.120.000 ₺</div>
+          <div class="card-sub">
+            <span class="card-sub-icon">◉</span>
+            <span>Alış fiyatı: 156,00 ₺/gr</span>
+          </div>
+        </div>
+
+        <!-- Anlık Kâr / Zarar -->
+        <div class="card" id="cardProfitLoss">
+          <div class="card-header">
+            <span class="card-icon" id="plIcon">⬆</span>
+            <span class="card-label">Anlık Kâr / Zarar</span>
+          </div>
+          <div class="card-value" id="profitLossValue">—</div>
+          <div class="card-sub">
+            <span class="card-sub-icon" id="plPctIcon">%</span>
+            <span id="profitLossPct">Yükleniyor...</span>
+          </div>
+        </div>
+
+        <!-- Halkbank Gümüş Alış -->
+        <div class="card card--glass" id="cardSilverBuy">
+          <div class="card-header">
+            <span class="card-icon">⇩</span>
+            <span class="card-label">Halkbank Gümüş Alış</span>
+          </div>
+          <div class="card-value card-value--silver" id="silverBuyPrice">—</div>
+          <div class="card-sub">
+            <span class="card-sub-icon">⬡</span>
+            <span>gram / TL</span>
+          </div>
+        </div>
+
+        <!-- Halkbank Gümüş Satış -->
+        <div class="card card--glass" id="cardSilverSell">
+          <div class="card-header">
+            <span class="card-icon">⇧</span>
+            <span class="card-label">Halkbank Gümüş Satış</span>
+          </div>
+          <div class="card-value card-value--silver" id="silverSellPrice">—</div>
+          <div class="card-sub">
+            <span class="card-sub-icon">⬡</span>
+            <span>gram / TL</span>
+          </div>
+        </div>
+
+        <!-- Kâr/Zarar Yüzdesi -->
+        <div class="card" id="cardProfitPct">
+          <div class="card-header">
+            <span class="card-icon">%</span>
+            <span class="card-label">Kâr / Zarar Yüzdesi</span>
+          </div>
+          <div class="card-value" id="profitPctBig">—</div>
+          <div class="card-sub">
+            <span class="card-sub-icon">↻</span>
+            <span>Yatırım getirisi</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── SECTION 2: GRAFİKLER ── -->
+    <section class="section" id="chartsSection">
+      <h2 class="section-title">
+        <span class="section-icon">◈</span>
+        Performans Grafikleri
+      </h2>
+
+      <div class="charts-row">
+
+        <!-- Halka Grafik -->
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3>Yatırım Dağılımı</h3>
+            <span class="chart-badge">Yüzde Bazlı</span>
+          </div>
+          <div class="chart-wrap chart-wrap--donut">
+            <canvas id="donutChart"></canvas>
+            <div class="donut-center" id="donutCenter">
+              <div class="donut-label">Getiri</div>
+              <div class="donut-value" id="donutValue">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar Karşılaştırma Grafiği -->
+        <div class="chart-card chart-card--wide">
+          <div class="chart-card-header">
+            <h3>Gümüş vs Altın Karşılaştırması</h3>
+            <span class="chart-badge">Kâr/Zarar TL</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: ALTIN KARŞILAŞTIRMASI ── -->
+    <section class="section" id="goldSection">
+      <h2 class="section-title">
+        <span class="section-icon gold-icon">✦</span>
+        Bu Parayla Altın Alsaydık Ne Olurdu?
+        <span class="section-badge section-badge--gold">Karşılaştırma</span>
+      </h2>
+
+      <div class="cards-grid cards-grid--4">
+
+        <!-- Alınan Altın Miktarı -->
+        <div class="card card--gold" id="cardGoldAmount">
+          <div class="card-header">
+            <span class="card-icon">✦</span>
+            <span class="card-label">Alınabilecek Altın</span>
+            <span class="card-badge card-badge--gold">1 Şub 2026</span>
+          </div>
+          <div class="card-value card-value--gold" id="goldAmount">—</div>
+          <div class="card-sub">
+            <span class="card-sub-icon">✦</span>
+            <span id="goldBuyPriceAtDate">Alış fiyatı yükleniyor...</span>
+          </div>
+        </div>
+
+        <!-- Altın Bugünkü Değeri -->
+        <div class="card card--gold" id="cardGoldCurrentValue">
+          <div class="card-header">
+            <span class="card-icon">✦</span>
+            <span class="card-label">Altın Bugünkü Değeri</span>
+          </div>
+          <div class="card-value card-value--gold" id="goldCurrentValue">—</div>
+          <div class="card-sub">
+            <span class="card-sub-icon">✦</span>
+            <span id="goldCurrentPricePerGram">Güncel altın fiyatı...</span>
+          </div>
+        </div>
+
+        <!-- Altın Kâr/Zarar -->
+        <div class="card" id="cardGoldPL">
+          <div class="card-header">
+            <span class="card-icon" id="goldPlIcon">⬆</span>
+            <span class="card-label">Altın Kâr / Zarar</span>
+          </div>
+          <div class="card-value" id="goldProfitLoss">—</div>
+          <div class="card-sub">
+            <span class="card-sub-icon">%</span>
+            <span id="goldProfitPct">Yükleniyor...</span>
+          </div>
+        </div>
+
+        <!-- Kazanan -->
+        <div class="card card--winner" id="cardWinner">
+          <div class="card-header">
+            <span class="card-icon">🏆</span>
+            <span class="card-label">Daha İyi Yatırım</span>
+          </div>
+          <div class="winner-display" id="winnerDisplay">
+            <div class="winner-name" id="winnerName">—</div>
+            <div class="winner-diff" id="winnerDiff">—</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Karşılaştırma Tablosu -->
+      <div class="comparison-table-wrap">
+        <h3 class="table-title">Detaylı Karşılaştırma Tablosu</h3>
+        <div class="table-scroll">
+          <table class="comparison-table" id="comparisonTable">
+            <thead>
+              <tr>
+                <th>Metrik</th>
+                <th class="col-silver">⬡ Gümüş</th>
+                <th class="col-gold">✦ Altın</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Yatırım Miktarı</td>
+                <td class="col-silver">20.000 gram</td>
+                <td class="col-gold" id="tblGoldGrams">—</td>
+              </tr>
+              <tr>
+                <td>Alış Fiyatı (gram/TL)</td>
+                <td class="col-silver">156,00 ₺</td>
+                <td class="col-gold" id="tblGoldBuyPrice">—</td>
+              </tr>
+              <tr>
+                <td>Toplam Maliyet</td>
+                <td class="col-silver">3.120.000 ₺</td>
+                <td class="col-gold">3.120.000 ₺</td>
+              </tr>
+              <tr>
+                <td>Güncel Fiyat (gram/TL)</td>
+                <td class="col-silver" id="tblSilverCurrentPrice">—</td>
+                <td class="col-gold" id="tblGoldCurrentPrice">—</td>
+              </tr>
+              <tr>
+                <td>Güncel Toplam Değer</td>
+                <td class="col-silver" id="tblSilverCurrentValue">—</td>
+                <td class="col-gold" id="tblGoldCurrentValue">—</td>
+              </tr>
+              <tr>
+                <td>Kâr / Zarar</td>
+                <td class="col-silver" id="tblSilverPL">—</td>
+                <td class="col-gold" id="tblGoldPL">—</td>
+              </tr>
+              <tr>
+                <td>Getiri Yüzdesi</td>
+                <td class="col-silver" id="tblSilverPct">—</td>
+                <td class="col-gold" id="tblGoldPct">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 4: HIZLI BİLGİ ── -->
+    <section class="section section--info">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-icon">⬡</span>
+          <div>
+            <div class="info-label">Gümüş Miktar</div>
+            <div class="info-value">20 kg / 20.000 gram</div>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">◉</span>
+          <div>
+            <div class="info-label">Alış Tarihi</div>
+            <div class="info-value">1 Şubat 2026</div>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">◈</span>
+          <div>
+            <div class="info-label">Alış Birim Fiyatı</div>
+            <div class="info-value">156,00 ₺ / gram</div>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">↻</span>
+          <div>
+            <div class="info-label">Yenileme Sıklığı</div>
+            <div class="info-value">Her 10 saniye</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-note">
+        ⚠️ Bu panel bilgilendirme amaçlıdır. Resmi işlem tutarı için Halkbank verileri esas alınmalıdır.
+      </p>
+      <p class="footer-copy">© 2026 Süleyman Savaş · Kişisel Yatırım Takip Paneli</p>
+    </div>
+  </footer>
+
+  <!-- Toast Bildirimi -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
