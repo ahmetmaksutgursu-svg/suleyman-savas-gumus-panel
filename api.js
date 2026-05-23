@@ -53,7 +53,7 @@ const API = (() => {
     };
   }
 
-  const GOLD_BUY_FEB_2026 = 3200.0;
+  const GOLD_BUY_FEB_2026 = 7215.04;
 
   return {
     fetchPrices,
