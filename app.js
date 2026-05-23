@@ -155,7 +155,7 @@ const eurPL = eurCurrentValue - INVESTMENT.totalCost;
 const eurPLPct = (eurPL / INVESTMENT.totalCost) * 100;
 
   return {
-    return {
+    
   silverBuy, silverSell,
   goldBuy,   goldSell,
   usdBuy,    usdSell,
