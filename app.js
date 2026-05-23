@@ -22,6 +22,8 @@ const INVESTMENT = {
 
 // 1 Şub 2026'da 3.120.000 TL ile alınan altın gramı
 const GOLD_GRAMS_BOUGHT = INVESTMENT.totalCost / INVESTMENT.goldBuyFeb;
+const USD_BOUGHT = INVESTMENT.totalCost / INVESTMENT.usdBuyFeb;
+const EUR_BOUGHT = INVESTMENT.totalCost / INVESTMENT.eurBuyFeb;
 
 /* ══════════════════════════════════════════
    2. DURUM (STATE)
@@ -124,9 +126,14 @@ function updateCardPL(cardId, value) {
    ══════════════════════════════════════════ */
 function calculate(prices) {
   const silverBuy  = prices.silverBuy;
-  const silverSell = prices.silverSell || prices.silverBuy * 1.045;
-  const goldBuy    = prices.goldBuy;
-  const goldSell   = prices.goldSell   || prices.goldBuy   * 1.038;
+const silverSell = prices.silverSell || prices.silverBuy * 1.045;
+const goldBuy    = prices.goldBuy;
+const goldSell   = prices.goldSell   || prices.goldBuy   * 1.038;
+
+const usdBuy     = prices.usdBuy;
+const usdSell    = prices.usdSell;
+const eurBuy     = prices.eurBuy;
+const eurSell    = prices.eurSell;
 
   // ── GÜMÜŞ ──
   const silverCurrentValue = silverBuy * INVESTMENT.silverGrams;
@@ -137,14 +144,33 @@ function calculate(prices) {
   const goldCurrentValue   = goldBuy * GOLD_GRAMS_BOUGHT;
   const goldPL             = goldCurrentValue - INVESTMENT.totalCost;
   const goldPLPct          = (goldPL / INVESTMENT.totalCost) * 100;
+   // ── DOLAR ──
+const usdCurrentValue = usdBuy * USD_BOUGHT;
+const usdPL = usdCurrentValue - INVESTMENT.totalCost;
+const usdPLPct = (usdPL / INVESTMENT.totalCost) * 100;
+
+// ── EURO ──
+const eurCurrentValue = eurBuy * EUR_BOUGHT;
+const eurPL = eurCurrentValue - INVESTMENT.totalCost;
+const eurPLPct = (eurPL / INVESTMENT.totalCost) * 100;
 
   return {
-    silverBuy, silverSell,
-    goldBuy,   goldSell,
-    silverCurrentValue, silverPL,    silverPLPct,
-    goldCurrentValue,   goldPL,       goldPLPct,
-    goldGramsBought:    GOLD_GRAMS_BOUGHT,
-  };
+    return {
+  silverBuy, silverSell,
+  goldBuy,   goldSell,
+  usdBuy,    usdSell,
+  eurBuy,    eurSell,
+
+  silverCurrentValue, silverPL, silverPLPct,
+  goldCurrentValue,   goldPL,   goldPLPct,
+
+  usdCurrentValue, usdPL, usdPLPct,
+  eurCurrentValue, eurPL, eurPLPct,
+
+  goldGramsBought: GOLD_GRAMS_BOUGHT,
+  usdAmountBought: USD_BOUGHT,
+  eurAmountBought: EUR_BOUGHT,
+};
 }
 
 /* ══════════════════════════════════════════
@@ -223,7 +249,53 @@ function updateCards(c) {
   }
   const gpiEl = $('goldPlIcon');
   if (gpiEl) gpiEl.textContent = plArrow(c.goldPL);
+// ── Dolar Bölümü ──
+updateCardPL('cardUsdPL', c.usdPL);
+shimmerCard('cardUsdPL');
 
+const usdValEl = $('usdCurrentValue');
+if (usdValEl) {
+  usdValEl.textContent = fmtTL(c.usdCurrentValue, 0);
+  usdValEl.className = `card-value card-value--${plClass(c.usdPL)}`;
+  animateUpdate(usdValEl);
+}
+
+const usdAmountEl = $('usdAmount');
+if (usdAmountEl) {
+  usdAmountEl.textContent =
+    `${fmtNum(c.usdAmountBought, 2)} USD alındı | Güncel alış: ${fmtTL(c.usdBuy)}`;
+}
+
+const usdPlEl = $('usdProfitLoss');
+if (usdPlEl) {
+  usdPlEl.textContent =
+    `Kâr/Zarar: ${(c.usdPL >= 0 ? '+' : '')}${fmtTL(c.usdPL, 0)} (${fmtPct(c.usdPLPct)})`;
+  usdPlEl.className = c.usdPL >= 0 ? 'text-profit' : 'text-loss';
+}
+
+// ── Euro Bölümü ──
+updateCardPL('cardEurPL', c.eurPL);
+shimmerCard('cardEurPL');
+
+const eurValEl = $('eurCurrentValue');
+if (eurValEl) {
+  eurValEl.textContent = fmtTL(c.eurCurrentValue, 0);
+  eurValEl.className = `card-value card-value--${plClass(c.eurPL)}`;
+  animateUpdate(eurValEl);
+}
+
+const eurAmountEl = $('eurAmount');
+if (eurAmountEl) {
+  eurAmountEl.textContent =
+    `${fmtNum(c.eurAmountBought, 2)} EUR alındı | Güncel alış: ${fmtTL(c.eurBuy)}`;
+}
+
+const eurPlEl = $('eurProfitLoss');
+if (eurPlEl) {
+  eurPlEl.textContent =
+    `Kâr/Zarar: ${(c.eurPL >= 0 ? '+' : '')}${fmtTL(c.eurPL, 0)} (${fmtPct(c.eurPLPct)})`;
+  eurPlEl.className = c.eurPL >= 0 ? 'text-profit' : 'text-loss';
+}
   // ── Kazanan ──
   updateWinner(c);
 
