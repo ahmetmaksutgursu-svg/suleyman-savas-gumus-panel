@@ -362,27 +362,45 @@ function updateTable(c) {
     const el = $(id);
     if (!el) return;
     el.textContent = val;
+
     if (pClass) {
       el.classList.remove('text-profit', 'text-loss', 'text-neutral');
-      el.classList.add(pClass === 'profit' ? 'text-profit' : pClass === 'loss' ? 'text-loss' : '');
+      if (pClass === 'profit') el.classList.add('text-profit');
+      else if (pClass === 'loss') el.classList.add('text-loss');
+      else el.classList.add('text-neutral');
     }
   };
 
-  set('tblGoldGrams',         fmtNum(c.goldGramsBought, 2) + ' gr');
-  set('tblGoldBuyPrice',      fmtTL(INVESTMENT.goldBuyFeb));
-  set('tblSilverCurrentPrice',fmtTL(c.silverBuy));
-  set('tblGoldCurrentPrice',  fmtTL(c.goldBuy));
-  set('tblSilverCurrentValue',fmtTL(c.silverCurrentValue, 0));
-  set('tblGoldCurrentValue',  fmtTL(c.goldCurrentValue, 0));
+  set('tblGoldGrams', fmtNum(c.goldGramsBought, 2) + ' gr');
+  set('tblUsdAmount', fmtNum(c.usdAmountBought, 2) + ' USD');
+  set('tblEurAmount', fmtNum(c.eurAmountBought, 2) + ' EUR');
+
+  set('tblGoldBuyPrice', fmtTL(INVESTMENT.goldBuyFeb));
+  set('tblSilverCurrentPrice', fmtTL(c.silverBuy));
+  set('tblGoldCurrentPrice', fmtTL(c.goldBuy));
+  set('tblUsdCurrentPrice', fmtTL(c.usdBuy));
+  set('tblEurCurrentPrice', fmtTL(c.eurBuy));
+
+  set('tblSilverCurrentValue', fmtTL(c.silverCurrentValue, 0));
+  set('tblGoldCurrentValue', fmtTL(c.goldCurrentValue, 0));
+  set('tblUsdCurrentValue', fmtTL(c.usdCurrentValue, 0));
+  set('tblEurCurrentValue', fmtTL(c.eurCurrentValue, 0));
 
   const splText = (c.silverPL >= 0 ? '+' : '') + fmtTL(c.silverPL, 0);
-  const gplText = (c.goldPL   >= 0 ? '+' : '') + fmtTL(c.goldPL,   0);
-  set('tblSilverPL',  splText, plClass(c.silverPL));
-  set('tblGoldPL',    gplText, plClass(c.goldPL));
-  set('tblSilverPct', fmtPct(c.silverPLPct), plClass(c.silverPL));
-  set('tblGoldPct',   fmtPct(c.goldPLPct),   plClass(c.goldPL));
-}
+  const gplText = (c.goldPL >= 0 ? '+' : '') + fmtTL(c.goldPL, 0);
+  const usdText = (c.usdPL >= 0 ? '+' : '') + fmtTL(c.usdPL, 0);
+  const eurText = (c.eurPL >= 0 ? '+' : '') + fmtTL(c.eurPL, 0);
 
+  set('tblSilverPL', splText, plClass(c.silverPL));
+  set('tblGoldPL', gplText, plClass(c.goldPL));
+  set('tblUsdPL', usdText, plClass(c.usdPL));
+  set('tblEurPL', eurText, plClass(c.eurPL));
+
+  set('tblSilverPct', fmtPct(c.silverPLPct), plClass(c.silverPL));
+  set('tblGoldPct', fmtPct(c.goldPLPct), plClass(c.goldPL));
+  set('tblUsdPct', fmtPct(c.usdPLPct), plClass(c.usdPL));
+  set('tblEurPct', fmtPct(c.eurPLPct), plClass(c.eurPL));
+}
 /* ══════════════════════════════════════════
    8. DURUM ÇUBUĞU
    ══════════════════════════════════════════ */
